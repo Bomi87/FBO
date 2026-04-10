@@ -6,38 +6,53 @@
   <title>FBO Finder</title>
   <style>
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: #f5f7fb;
       color: #1f2937;
     }
+
     .wrap {
-      max-width: 900px;
+      max-width: 980px;
       margin: 0 auto;
       padding: 24px 16px 48px;
     }
+
     .card {
       background: #fff;
       border-radius: 16px;
       padding: 20px;
       box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      margin-bottom: 18px;
     }
-    h1 {
+
+    h1, h2 {
       margin: 0 0 8px;
+    }
+
+    h1 {
       font-size: 28px;
     }
+
+    h2 {
+      font-size: 22px;
+    }
+
     .sub {
       margin: 0 0 20px;
       color: #6b7280;
       font-size: 14px;
     }
+
     .search-row {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
       margin-bottom: 18px;
     }
+
     input[type="text"] {
       flex: 1;
       min-width: 220px;
@@ -48,6 +63,7 @@
       font-size: 16px;
       text-transform: uppercase;
     }
+
     button {
       height: 46px;
       border: none;
@@ -56,21 +72,87 @@
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
+    }
+
+    .primary-btn {
       background: #2563eb;
       color: white;
     }
-    button:hover {
+
+    .primary-btn:hover {
       background: #1d4ed8;
     }
+
+    .danger-btn {
+      background: #ef4444;
+      color: white;
+    }
+
+    .danger-btn:hover {
+      background: #dc2626;
+    }
+
+    .secondary-btn {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .secondary-btn:hover {
+      background: #d1d5db;
+    }
+
+    .mini-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .fav-btn {
+      background: #f59e0b;
+      color: white;
+    }
+
+    .fav-btn:hover {
+      background: #d97706;
+    }
+
+    .remove-btn {
+      background: #ef4444;
+      color: white;
+    }
+
+    .remove-btn:hover {
+      background: #dc2626;
+    }
+
+    .call-btn {
+      background: #10b981;
+      color: white;
+    }
+
+    .call-btn:hover {
+      background: #059669;
+    }
+
     .status {
       margin: 10px 0 0;
       font-size: 14px;
       color: #6b7280;
     }
+
     .result-head {
       margin-top: 24px;
       margin-bottom: 14px;
     }
+
     .icao {
       display: inline-block;
       padding: 5px 10px;
@@ -81,79 +163,132 @@
       font-weight: 700;
       margin-bottom: 10px;
     }
+
     .airport-name {
       font-size: 24px;
       font-weight: 700;
       margin: 0 0 8px;
     }
+
     .count {
       color: #6b7280;
       font-size: 14px;
     }
+
     .fbo-list {
       display: grid;
       gap: 12px;
       margin-top: 18px;
     }
+
     .fbo-item {
       border: 1px solid #e5e7eb;
       border-radius: 14px;
       padding: 16px;
       background: #fafafa;
     }
+
     .fbo-name {
       font-size: 18px;
       font-weight: 700;
       margin-bottom: 8px;
     }
-    .phone-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+
     .phone-text {
       font-size: 15px;
       color: #111827;
       word-break: break-all;
+      margin-bottom: 12px;
     }
-    .call-btn {
-      display: inline-block;
-      text-decoration: none;
-      background: #10b981;
-      color: white;
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 700;
+
+    .action-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
     }
-    .call-btn:hover {
-      background: #059669;
-    }
+
     .empty {
-      margin-top: 18px;
+      margin-top: 8px;
       padding: 16px;
       border-radius: 12px;
       background: #fff7ed;
       color: #9a3412;
       border: 1px solid #fdba74;
     }
+
+    .fav-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .fav-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .fav-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 14px;
+      background: #f9fafb;
+    }
+
+    .fav-main {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .fav-route-line {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .fav-airport-name {
+      color: #6b7280;
+      font-size: 13px;
+    }
+
+    .fav-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     .footer-note {
       margin-top: 18px;
       font-size: 12px;
       color: #6b7280;
       line-height: 1.5;
     }
+
     @media (max-width: 640px) {
       h1 { font-size: 24px; }
+      h2 { font-size: 20px; }
       .airport-name { font-size: 20px; }
-      .phone-row {
-        align-items: flex-start;
-        flex-direction: column;
+
+      .fav-item,
+      .action-row {
+        align-items: stretch;
       }
-      .call-btn {
+
+      .fav-actions,
+      .action-row {
         width: 100%;
+      }
+
+      .fav-actions .mini-btn,
+      .action-row .mini-btn {
+        flex: 1;
         text-align: center;
       }
     }
@@ -161,42 +296,58 @@
 </head>
 <body>
   <div class="wrap">
+
+    <div class="card">
+      <div class="fav-head">
+        <div>
+          <h2>Favorites Route</h2>
+          <div class="sub" style="margin:0;">
+            Save one preferred FBO per airport and keep your route summary here.
+          </div>
+        </div>
+        <button id="resetFavoritesBtn" class="danger-btn">Reset Favorites</button>
+      </div>
+
+      <div id="favoritesBox"></div>
+    </div>
+
     <div class="card">
       <h1>FBO Finder</h1>
       <p class="sub">Enter a 4-letter ICAO code to see FBO names and phone numbers.</p>
 
       <div class="search-row">
-        <input type="text" id="icaoInput" maxlength="4" placeholder="e.g. BIRK, CYAM, RKSI" />
-        <button id="searchBtn">Search</button>
+        <input type="text" id="icaoInput" maxlength="4" placeholder="e.g. RKSS, PANC, KEWR" />
+        <button id="searchBtn" class="primary-btn">Search</button>
       </div>
 
       <div class="status" id="status">Ready.</div>
       <div id="result"></div>
 
       <div class="footer-note">
-        Clicking a phone number adds <b>00700</b> before dialing.  
-        Example: <code>+1 705-779-3977</code> → <code>0070017057793977</code>
+        Clicking Call adds <b>00700</b> before dialing. Example:
+        <code>+1 705-779-3977</code> → <code>0070017057793977</code>
       </div>
     </div>
+
   </div>
 
   <script>
-    // 여기에 Apps Script 웹앱 URL 넣기
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyu-WXU6qGp8oZGxSZxJkSoIrxPKc-vIgZFKGGxzNOBi28_LRkeN7a0DJAhPV4j0wry/exec";
+    // 여기에 Apps Script 웹앱 URL 입력
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_HT56nnSDL8YGJ2JowOXDOZYE4ErsHSJoOq_1Gw2Hxnht7kjadw0ngbFsH5lZm7UZ/exec";
+    const FAVORITES_KEY = "fbo_favorites_v1";
 
     const icaoInput = document.getElementById("icaoInput");
     const searchBtn = document.getElementById("searchBtn");
     const statusEl = document.getElementById("status");
     const resultEl = document.getElementById("result");
+    const favoritesBox = document.getElementById("favoritesBox");
+    const resetFavoritesBtn = document.getElementById("resetFavoritesBtn");
 
     function sanitizeDialNumber(phone) {
       if (!phone) return "";
       let cleaned = String(phone).trim();
-
-      // 앞의 + 제거 후 숫자만 남김
       cleaned = cleaned.replace(/^\+/, "");
       cleaned = cleaned.replace(/[^\d]/g, "");
-
       if (!cleaned) return "";
       return "00700" + cleaned;
     }
@@ -208,6 +359,95 @@
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
+    }
+
+    function setStatus(msg) {
+      statusEl.textContent = msg;
+    }
+
+    function getFavorites() {
+      try {
+        const raw = localStorage.getItem(FAVORITES_KEY);
+        return raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveFavorites(data) {
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(data));
+    }
+
+    function addFavorite(item) {
+      const favorites = getFavorites();
+
+      favorites[item.icao] = {
+        icao: item.icao,
+        airportName: item.airportName || "",
+        fboName: item.fboName || "",
+        phone: item.phone || ""
+      };
+
+      saveFavorites(favorites);
+      renderFavorites();
+    }
+
+    function removeFavorite(icao) {
+      const favorites = getFavorites();
+      delete favorites[icao];
+      saveFavorites(favorites);
+      renderFavorites();
+    }
+
+    function resetFavorites() {
+      const favorites = getFavorites();
+      const keys = Object.keys(favorites);
+
+      if (!keys.length) {
+        alert("There are no favorites to reset.");
+        return;
+      }
+
+      const ok = confirm("Are you sure you want to reset all favorites?");
+      if (!ok) return;
+
+      localStorage.removeItem(FAVORITES_KEY);
+      renderFavorites();
+      alert("Favorites have been reset.");
+    }
+
+    function renderFavorites() {
+      const favorites = getFavorites();
+      const list = Object.values(favorites);
+
+      if (!list.length) {
+        favoritesBox.innerHTML = `
+          <div class="empty">
+            No favorites saved yet.
+          </div>
+        `;
+        return;
+      }
+
+      const html = list.map(item => {
+        const dial = sanitizeDialNumber(item.phone);
+        return `
+          <div class="fav-item">
+            <div class="fav-main">
+              <div class="fav-route-line">
+                ${escapeHtml(item.icao)}: ${escapeHtml(item.fboName)} ${item.phone ? "(" + escapeHtml(item.phone) + ")" : ""}
+              </div>
+              <div class="fav-airport-name">${escapeHtml(item.airportName || "")}</div>
+            </div>
+            <div class="fav-actions">
+              ${dial ? `<a class="mini-btn call-btn" href="tel:${dial}">Call</a>` : ""}
+              <button class="mini-btn remove-btn" onclick="removeFavorite('${escapeHtml(item.icao)}')">Remove</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      favoritesBox.innerHTML = `<div class="fav-list">${html}</div>`;
     }
 
     function renderResult(data) {
@@ -224,16 +464,23 @@
         const name = item.name || "(No FBO Name)";
         const phone = item.phone || "";
         const dial = sanitizeDialNumber(phone);
-        const callButton = dial
-          ? `<a class="call-btn" href="tel:${dial}">Call</a>`
-          : "";
+
+        const favPayload = {
+          icao: data.icao || "",
+          airportName: data.airportName || "",
+          fboName: name,
+          phone: phone
+        };
+
+        const favEncoded = encodeURIComponent(JSON.stringify(favPayload));
 
         return `
           <div class="fbo-item">
             <div class="fbo-name">${escapeHtml(name)}</div>
-            <div class="phone-row">
-              <div class="phone-text">${phone ? escapeHtml(phone) : "No phone number"}</div>
-              ${callButton}
+            <div class="phone-text">${phone ? escapeHtml(phone) : "No phone number"}</div>
+            <div class="action-row">
+              ${dial ? `<a class="mini-btn call-btn" href="tel:${dial}">Call</a>` : ""}
+              <button class="mini-btn fav-btn" onclick="addFavoriteFromEncoded('${favEncoded}')">Add to Favorites</button>
             </div>
           </div>
         `;
@@ -251,8 +498,14 @@
       `;
     }
 
-    function setStatus(msg) {
-      statusEl.textContent = msg;
+    function addFavoriteFromEncoded(encoded) {
+      try {
+        const item = JSON.parse(decodeURIComponent(encoded));
+        addFavorite(item);
+        alert(`Saved: ${item.icao} - ${item.fboName}`);
+      } catch (e) {
+        alert("Failed to save favorite.");
+      }
     }
 
     function searchFbo() {
@@ -281,6 +534,7 @@
 
       const script = document.createElement("script");
       script.src = `${SCRIPT_URL}?icao=${encodeURIComponent(icao)}&callback=${callbackName}`;
+
       script.onerror = function() {
         setStatus("Request failed.");
         resultEl.innerHTML = `
@@ -304,6 +558,13 @@
     icaoInput.addEventListener("input", function() {
       this.value = this.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 4);
     });
+
+    resetFavoritesBtn.addEventListener("click", resetFavorites);
+
+    window.addFavoriteFromEncoded = addFavoriteFromEncoded;
+    window.removeFavorite = removeFavorite;
+
+    renderFavorites();
   </script>
 </body>
 </html>
