@@ -287,15 +287,32 @@
     const favoritesBox = document.getElementById("favoritesBox");
     const resetFavoritesBtn = document.getElementById("resetFavoritesBtn");
 
-    function sanitizeDialNumber(phone) {
-      if (!phone) return "";
-      let cleaned = String(phone).trim();
-      cleaned = cleaned.replace(/^\+/, "");
-      cleaned = cleaned.replace(/[^\d]/g, "");
-      if (!cleaned) return "";
-      return "00700" + cleaned;
-    }
+  function sanitizeDialNumber(phone) {
+  if (!phone) return "";
 
+  const raw = String(phone).trim();
+  if (!raw) return "";
+
+  // 공백/하이픈/괄호 제거, 맨 앞 + 는 일단 유지
+  let normalized = raw.replace(/[\s\-\(\)]/g, "");
+
+  // 1) 한국 국제번호(+82)는 00700 없이 그대로 사용
+  if (normalized.startsWith("+82")) {
+    return normalized;
+  }
+
+  // 2) 이미 국내 형식(0으로 시작)인 번호도 그대로 사용
+  if (normalized.startsWith("0")) {
+    return normalized.replace(/[^\d]/g, "");
+  }
+
+  // 3) 그 외 해외번호는 + 제거 후 00700 붙이기
+  normalized = normalized.replace(/^\+/, "");
+  normalized = normalized.replace(/[^\d]/g, "");
+
+  if (!normalized) return "";
+  return "00700" + normalized;
+}
     function escapeHtml(str) {
       return String(str || "")
         .replace(/&/g, "&amp;")
