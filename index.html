@@ -301,9 +301,9 @@
     <div class="card">
       <div class="fav-head">
         <div>
-          <h2>Favorites Route</h2>
+          <h2>Shared Favorites Route</h2>
           <div class="sub" style="margin:0;">
-            Save one preferred FBO per airport and keep your route summary here.
+            Shared favorites are visible to everyone using this page.
           </div>
         </div>
         <button id="resetFavoritesBtn" class="danger-btn">Reset Favorites</button>
@@ -333,8 +333,7 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby59MBsMyxvTZTb6rQNJdK37_X4nLau2qRT71TGmkdcNfumD0GqIjp89qAphXeQ6W1n/exec";
-    const FAVORITES_KEY = "fbo_favorites_v1";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqPDam8lHKbsilNXMPN57fRwU3VYiEW9w94pBLiXhlXsaJCH2CLssrt_HQ9F0C75W5/exec";
 
     const icaoInput = document.getElementById("icaoInput");
     const searchBtn = document.getElementById("searchBtn");
@@ -368,65 +367,13 @@
       statusEl.textContent = msg;
     }
 
-    function getFavorites() {
-      try {
-        const raw = localStorage.getItem(FAVORITES_KEY);
-        return raw ? JSON.parse(raw) : {};
-      } catch (e) {
-        return {};
-      }
-    }
-
-    function saveFavorites(data) {
-      localStorage.setItem(FAVORITES_KEY, JSON.stringify(data));
-    }
-
-    function addFavorite(item) {
-      const favorites = getFavorites();
-
-      favorites[item.icao] = {
-        icao: item.icao,
-        airportName: item.airportName || "",
-        fboName: item.fboName || "",
-        phone: item.phone || ""
-      };
-
-      saveFavorites(favorites);
-      renderFavorites();
-    }
-
-    function removeFavorite(icao) {
-      const favorites = getFavorites();
-      delete favorites[icao];
-      saveFavorites(favorites);
-      renderFavorites();
-    }
-
-    function resetFavorites() {
-      const favorites = getFavorites();
-      const keys = Object.keys(favorites);
-
-      if (!keys.length) {
-        alert("There are no favorites to reset.");
-        return;
-      }
-
-      const ok = confirm("Are you sure you want to reset all favorites?");
-      if (!ok) return;
-
-      localStorage.removeItem(FAVORITES_KEY);
-      renderFavorites();
-      alert("Favorites have been reset.");
-    }
-
-    function renderFavorites() {
-      const favorites = getFavorites();
-      const list = Object.values(favorites);
+    function renderFavorites(favorites) {
+      const list = Array.isArray(favorites) ? favorites : [];
 
       if (!list.length) {
         favoritesBox.innerHTML = `
           <div class="empty">
-            No favorites saved yet.
+            No shared favorites saved yet.
           </div>
         `;
         return;
@@ -455,9 +402,7 @@
 
     function renderResult(data) {
       if (!data) {
-        resultEl.innerHTML = `
-          <div class="empty">No data found.</div>
-        `;
+        resultEl.innerHTML = `<div class="empty">No data found.</div>`;
         return;
       }
 
@@ -465,13 +410,15 @@
         const name = item.name || "(No FBO Name)";
         const phone = item.phone || "";
         const dial = sanitizeDialNumber(phone);
-        const favPayload = {
+
+        const payload = {
           icao: data.icao || "",
           airportName: data.airportName || "",
           fboName: name,
           phone: phone
         };
-        const favEncoded = encodeURIComponent(JSON.stringify(favPayload));
+
+        const encoded = encodeURIComponent(JSON.stringify(payload));
 
         return `
           <div class="fbo-item">
@@ -479,7 +426,7 @@
             <div class="phone-text">${phone ? escapeHtml(phone) : "No phone number"}</div>
             <div class="action-row">
               ${dial ? `<a class="mini-btn call-btn" href="tel:${dial}">Call</a>` : ""}
-              <button class="mini-btn fav-btn" onclick="addFavoriteFromEncoded('${favEncoded}')">Add to Favorites</button>
+              <button class="mini-btn fav-btn" onclick="saveSharedFavorite('${encoded}')">Add to Shared Favorites</button>
             </div>
           </div>
         `;
@@ -495,16 +442,6 @@
           ${fboHtml || `<div class="empty">No FBO information available.</div>`}
         </div>
       `;
-    }
-
-    function addFavoriteFromEncoded(encoded) {
-      try {
-        const item = JSON.parse(decodeURIComponent(encoded));
-        addFavorite(item);
-        alert(`Saved: ${item.icao} - ${item.fboName}`);
-      } catch (e) {
-        alert("Failed to save favorite.");
-      }
     }
 
     function searchFbo() {
@@ -535,6 +472,18 @@
 
       renderResult(data);
       setStatus("Done.");
+    }
+
+    async function apiPost(payload) {
+      const res = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      return await res.json();
     }
 
     function loadAllData() {
@@ -588,6 +537,109 @@
       document.body.appendChild(script);
     }
 
+    function loadSharedFavorites() {
+      const callbackName = "jsonpFavoritesCallback_" + Date.now();
+
+      window[callbackName] = function(data) {
+        try {
+          if (!data || !data.ok) {
+            favoritesBox.innerHTML = `
+              <div class="empty">
+                Failed to load shared favorites.
+              </div>
+            `;
+            return;
+          }
+
+          renderFavorites(data.favorites || []);
+        } finally {
+          delete window[callbackName];
+          script.remove();
+        }
+      };
+
+      const script = document.createElement("script");
+      script.src = `${SCRIPT_URL}?action=favorites&callback=${callbackName}`;
+
+      script.onerror = function() {
+        favoritesBox.innerHTML = `
+          <div class="empty">
+            Failed to load shared favorites.
+          </div>
+        `;
+        delete window[callbackName];
+        script.remove();
+      };
+
+      document.body.appendChild(script);
+    }
+
+    async function saveSharedFavorite(encoded) {
+      try {
+        const item = JSON.parse(decodeURIComponent(encoded));
+
+        const result = await apiPost({
+          action: "saveFavorite",
+          icao: item.icao,
+          airportName: item.airportName,
+          fboName: item.fboName,
+          phone: item.phone
+        });
+
+        if (!result.ok) {
+          alert(result.message || "Failed to save shared favorite.");
+          return;
+        }
+
+        await loadSharedFavorites();
+        alert(`Saved: ${item.icao} - ${item.fboName}`);
+      } catch (err) {
+        alert("Failed to save shared favorite.");
+      }
+    }
+
+    async function removeFavorite(icao) {
+      try {
+        const ok = confirm(`Remove shared favorite for ${icao}?`);
+        if (!ok) return;
+
+        const result = await apiPost({
+          action: "removeFavorite",
+          icao: icao
+        });
+
+        if (!result.ok) {
+          alert(result.message || "Failed to remove favorite.");
+          return;
+        }
+
+        await loadSharedFavorites();
+      } catch (err) {
+        alert("Failed to remove favorite.");
+      }
+    }
+
+    async function resetFavorites() {
+      try {
+        const ok = confirm("Are you sure you want to reset all shared favorites?");
+        if (!ok) return;
+
+        const result = await apiPost({
+          action: "resetFavorites"
+        });
+
+        if (!result.ok) {
+          alert(result.message || "Failed to reset favorites.");
+          return;
+        }
+
+        await loadSharedFavorites();
+        alert("Shared favorites have been reset.");
+      } catch (err) {
+        alert("Failed to reset favorites.");
+      }
+    }
+
     searchBtn.addEventListener("click", searchFbo);
 
     icaoInput.addEventListener("keydown", function(e) {
@@ -600,11 +652,11 @@
 
     resetFavoritesBtn.addEventListener("click", resetFavorites);
 
-    window.addFavoriteFromEncoded = addFavoriteFromEncoded;
+    window.saveSharedFavorite = saveSharedFavorite;
     window.removeFavorite = removeFavorite;
 
-    renderFavorites();
     loadAllData();
+    loadSharedFavorites();
   </script>
 </body>
 </html>
