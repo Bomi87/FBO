@@ -420,7 +420,7 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwR5WaX79FuH4SihUMo68ggrirel-hcRzekMvud_r6MLdsD3jrkpA9LqwkVzVRwvr6n/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzb3hTae8Ka_Bvi475g-jKvpRUrbDvUrnQ7SAv_Om8CfcNdgMDLqH68Gs8wMf_IO0NC/exec";
 
     const icaoInput = document.getElementById("icaoInput");
     const searchBtn = document.getElementById("searchBtn");
@@ -597,7 +597,7 @@
       };
 
       const script = document.createElement("script");
-      script.src = `${SCRIPT_URL}?action=search&icao=${encodeURIComponent(icao)}&callback=${callbackName}&${cacheBust}`;
+     script.src = `${SCRIPT_URL}?action=search&icao=${encodeURIComponent(icao)}&force=${forceRefresh ? "1" : "0"}&callback=${callbackName}&_ts=${Date.now()}`;
 
       script.onerror = function() {
         setStatus("Request failed.");
