@@ -398,27 +398,36 @@
     const resetFavoritesBtn = document.getElementById("resetFavoritesBtn");
 
     function sanitizeDialNumber(phone) {
-      if (!phone) return "";
+  if (!phone) return "";
 
-      const raw = String(phone).trim();
-      if (!raw) return "";
+  const raw = String(phone).trim();
+  if (!raw) return "";
 
-      let normalized = raw.replace(/[\s\-\(\)]/g, "");
+  let normalized = raw.replace(/[\s\-\(\)]/g, "");
 
-      if (normalized.startsWith("+82")) {
-        return normalized;
-      }
+  // 한국 국제번호(+82) → 국내형식 0으로 변환
+  if (normalized.startsWith("+82")) {
+    let local = normalized.substring(3); // +82 제거
+    local = local.replace(/[^\d]/g, "");
 
-      if (normalized.startsWith("0")) {
-        return normalized.replace(/[^\d]/g, "");
-      }
-
-      normalized = normalized.replace(/^\+/, "");
-      normalized = normalized.replace(/[^\d]/g, "");
-
-      if (!normalized) return "";
-      return "00700" + normalized;
+    if (!local.startsWith("0")) {
+      local = "0" + local;
     }
+    return local;
+  }
+
+  // 이미 국내번호면 그대로
+  if (normalized.startsWith("0")) {
+    return normalized.replace(/[^\d]/g, "");
+  }
+
+  // 그 외 해외번호는 00700 붙이기
+  normalized = normalized.replace(/^\+/, "");
+  normalized = normalized.replace(/[^\d]/g, "");
+
+  if (!normalized) return "";
+  return "00700" + normalized;
+}
 
     function escapeHtml(str) {
       return String(str || "")
