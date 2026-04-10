@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FBO Finder</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #1f2937;
+    }
+    .wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+    .sub {
+      margin: 0 0 20px;
+      color: #6b7280;
+      font-size: 14px;
+    }
+    .search-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    input[type="text"] {
+      flex: 1;
+      min-width: 220px;
+      height: 46px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 0 14px;
+      font-size: 16px;
+      text-transform: uppercase;
+    }
+    button {
+      height: 46px;
+      border: none;
+      border-radius: 12px;
+      padding: 0 18px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+    .status {
+      margin: 10px 0 0;
+      font-size: 14px;
+      color: #6b7280;
+    }
+    .result-head {
+      margin-top: 24px;
+      margin-bottom: 14px;
+    }
+    .icao {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #e0ecff;
+      color: #1d4ed8;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .airport-name {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .count {
+      color: #6b7280;
+      font-size: 14px;
+    }
+    .fbo-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .fbo-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 16px;
+      background: #fafafa;
+    }
+    .fbo-name {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .phone-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .phone-text {
+      font-size: 15px;
+      color: #111827;
+      word-break: break-all;
+    }
+    .call-btn {
+      display: inline-block;
+      text-decoration: none;
+      background: #10b981;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .call-btn:hover {
+      background: #059669;
+    }
+    .empty {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 12px;
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1px solid #fdba74;
+    }
+    .footer-note {
+      margin-top: 18px;
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.5;
+    }
+    @media (max-width: 640px) {
+      h1 { font-size: 24px; }
+      .airport-name { font-size: 20px; }
+      .phone-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .call-btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>FBO Finder</h1>
+      <p class="sub">Enter a 4-letter ICAO code to see FBO names and phone numbers.</p>
+
+      <div class="search-row">
+        <input type="text" id="icaoInput" maxlength="4" placeholder="e.g. BIRK, CYAM, RKSI" />
+        <button id="searchBtn">Search</button>
+      </div>
+
+      <div class="status" id="status">Ready.</div>
+      <div id="result"></div>
+
+      <div class="footer-note">
+        Clicking a phone number adds <b>00700</b> before dialing.  
+        Example: <code>+1 705-779-3977</code> → <code>0070017057793977</code>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 여기에 Apps Script 웹앱 URL 넣기
+    const SCRIPT_URL = "YOUR_APPS_SCRIPT_WEBAPP_URL_HERE";
+
+    const icaoInput = document.getElementById("icaoInput");
+    const searchBtn = document.getElementById("searchBtn");
+    const statusEl = document.getElementById("status");
+    const resultEl = document.getElementById("result");
+
+    function sanitizeDialNumber(phone) {
+      if (!phone) return "";
+      let cleaned = String(phone).trim();
+
+      // 앞의 + 제거 후 숫자만 남김
+      cleaned = cleaned.replace(/^\+/, "");
+      cleaned = cleaned.replace(/[^\d]/g, "");
+
+      if (!cleaned) return "";
+      return "00700" + cleaned;
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function renderResult(data) {
+      if (!data || !data.ok) {
+        resultEl.innerHTML = `
+          <div class="empty">
+            ${escapeHtml((data && data.message) || "No data found.")}
+          </div>
+        `;
+        return;
+      }
+
+      const fboHtml = (data.fbos || []).map(item => {
+        const name = item.name || "(No FBO Name)";
+        const phone = item.phone || "";
+        const dial = sanitizeDialNumber(phone);
+        const callButton = dial
+          ? `<a class="call-btn" href="tel:${dial}">Call</a>`
+          : "";
+
+        return `
+          <div class="fbo-item">
+            <div class="fbo-name">${escapeHtml(name)}</div>
+            <div class="phone-row">
+              <div class="phone-text">${phone ? escapeHtml(phone) : "No phone number"}</div>
+              ${callButton}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      resultEl.innerHTML = `
+        <div class="result-head">
+          <div class="icao">${escapeHtml(data.icao)}</div>
+          <div class="airport-name">${escapeHtml(data.airportName || "Unknown Airport")}</div>
+          <div class="count">FBO count: ${data.count || 0}</div>
+        </div>
+        <div class="fbo-list">
+          ${fboHtml || `<div class="empty">No FBO information available.</div>`}
+        </div>
+      `;
+    }
+
+    function setStatus(msg) {
+      statusEl.textContent = msg;
+    }
+
+    function searchFbo() {
+      const icao = icaoInput.value.trim().toUpperCase();
+
+      if (icao.length !== 4) {
+        setStatus("Please enter a 4-letter ICAO code.");
+        resultEl.innerHTML = "";
+        return;
+      }
+
+      setStatus("Searching...");
+      resultEl.innerHTML = "";
+
+      const callbackName = "jsonpCallback_" + Date.now();
+
+      window[callbackName] = function(data) {
+        try {
+          renderResult(data);
+          setStatus(data && data.ok ? "Done." : "No result.");
+        } finally {
+          delete window[callbackName];
+          script.remove();
+        }
+      };
+
+      const script = document.createElement("script");
+      script.src = `${SCRIPT_URL}?icao=${encodeURIComponent(icao)}&callback=${callbackName}`;
+      script.onerror = function() {
+        setStatus("Request failed.");
+        resultEl.innerHTML = `
+          <div class="empty">
+            Failed to load data. Check the Apps Script deployment URL.
+          </div>
+        `;
+        delete window[callbackName];
+        script.remove();
+      };
+
+      document.body.appendChild(script);
+    }
+
+    searchBtn.addEventListener("click", searchFbo);
+
+    icaoInput.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") searchFbo();
+    });
+
+    icaoInput.addEventListener("input", function() {
+      this.value = this.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 4);
+    });
+  </script>
+</body>
+</html>
