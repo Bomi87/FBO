@@ -6,20 +6,17 @@
   <title>FBO Finder</title>
   <style>
     * { box-sizing: border-box; }
-
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: #f5f7fb;
       color: #1f2937;
     }
-
     .wrap {
       max-width: 980px;
       margin: 0 auto;
       padding: 24px 16px 48px;
     }
-
     .card {
       background: #fff;
       border-radius: 16px;
@@ -27,32 +24,20 @@
       box-shadow: 0 6px 20px rgba(0,0,0,0.08);
       margin-bottom: 18px;
     }
-
-    h1, h2 {
-      margin: 0 0 8px;
-    }
-
-    h1 {
-      font-size: 28px;
-    }
-
-    h2 {
-      font-size: 22px;
-    }
-
+    h1, h2 { margin: 0 0 8px; }
+    h1 { font-size: 28px; }
+    h2 { font-size: 22px; }
     .sub {
       margin: 0 0 20px;
       color: #6b7280;
       font-size: 14px;
     }
-
     .search-row {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
       margin-bottom: 18px;
     }
-
     input[type="text"] {
       flex: 1;
       min-width: 220px;
@@ -63,7 +48,6 @@
       font-size: 16px;
       text-transform: uppercase;
     }
-
     button {
       height: 46px;
       border: none;
@@ -73,25 +57,20 @@
       font-weight: 600;
       cursor: pointer;
     }
-
     .primary-btn {
       background: #2563eb;
       color: white;
     }
-
     .primary-btn:hover {
       background: #1d4ed8;
     }
-
     .danger-btn {
       background: #ef4444;
       color: white;
     }
-
     .danger-btn:hover {
       background: #dc2626;
     }
-
     .mini-btn {
       display: inline-flex;
       align-items: center;
@@ -105,45 +84,36 @@
       cursor: pointer;
       text-decoration: none;
     }
-
     .fav-btn {
       background: #f59e0b;
       color: white;
     }
-
     .fav-btn:hover {
       background: #d97706;
     }
-
     .remove-btn {
       background: #ef4444;
       color: white;
     }
-
     .remove-btn:hover {
       background: #dc2626;
     }
-
     .call-btn {
       background: #10b981;
       color: white;
     }
-
     .call-btn:hover {
       background: #059669;
     }
-
     .status {
       margin: 10px 0 0;
       font-size: 14px;
       color: #6b7280;
     }
-
     .result-head {
       margin-top: 24px;
       margin-bottom: 14px;
     }
-
     .icao {
       display: inline-block;
       padding: 5px 10px;
@@ -154,50 +124,42 @@
       font-weight: 700;
       margin-bottom: 10px;
     }
-
     .airport-name {
       font-size: 24px;
       font-weight: 700;
       margin: 0 0 8px;
     }
-
     .count {
       color: #6b7280;
       font-size: 14px;
     }
-
     .fbo-list {
       display: grid;
       gap: 12px;
       margin-top: 18px;
     }
-
     .fbo-item {
       border: 1px solid #e5e7eb;
       border-radius: 14px;
       padding: 16px;
       background: #fafafa;
     }
-
     .fbo-name {
       font-size: 18px;
       font-weight: 700;
       margin-bottom: 8px;
     }
-
     .phone-text {
       font-size: 15px;
       color: #111827;
       word-break: break-all;
       margin-bottom: 12px;
     }
-
     .action-row {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
     }
-
     .empty {
       margin-top: 8px;
       padding: 16px;
@@ -206,7 +168,6 @@
       color: #9a3412;
       border: 1px solid #fdba74;
     }
-
     .fav-head {
       display: flex;
       justify-content: space-between;
@@ -215,12 +176,10 @@
       flex-wrap: wrap;
       margin-bottom: 12px;
     }
-
     .fav-list {
       display: grid;
       gap: 10px;
     }
-
     .fav-item {
       display: flex;
       justify-content: space-between;
@@ -232,36 +191,30 @@
       padding: 14px;
       background: #f9fafb;
     }
-
     .fav-main {
       flex: 1;
       min-width: 220px;
     }
-
     .fav-route-line {
       font-size: 16px;
       font-weight: 700;
       margin-bottom: 5px;
     }
-
     .fav-airport-name {
       color: #6b7280;
       font-size: 13px;
     }
-
     .fav-actions {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
     }
-
     .footer-note {
       margin-top: 18px;
       font-size: 12px;
       color: #6b7280;
       line-height: 1.5;
     }
-
     .loading-box {
       margin-top: 10px;
       padding: 14px;
@@ -271,24 +224,17 @@
       color: #1d4ed8;
       font-size: 14px;
     }
-
     @media (max-width: 640px) {
       h1 { font-size: 24px; }
       h2 { font-size: 20px; }
       .airport-name { font-size: 20px; }
-
-      .fav-item,
-      .action-row {
+      .fav-item, .action-row {
         align-items: stretch;
       }
-
-      .fav-actions,
-      .action-row {
+      .fav-actions, .action-row {
         width: 100%;
       }
-
-      .fav-actions .mini-btn,
-      .action-row .mini-btn {
+      .fav-actions .mini-btn, .action-row .mini-btn {
         flex: 1;
         text-align: center;
       }
@@ -308,7 +254,6 @@
         </div>
         <button id="resetFavoritesBtn" class="danger-btn">Reset Favorites</button>
       </div>
-
       <div id="favoritesBox"></div>
     </div>
 
@@ -321,7 +266,7 @@
         <button id="searchBtn" class="primary-btn">Search</button>
       </div>
 
-      <div class="status" id="status">Loading FBO database...</div>
+      <div class="status" id="status">Ready.</div>
       <div id="result"></div>
 
       <div class="footer-note">
@@ -333,7 +278,7 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqPDam8lHKbsilNXMPN57fRwU3VYiEW9w94pBLiXhlXsaJCH2CLssrt_HQ9F0C75W5/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1ZIjrKfLsXhAITvGSEYiB_vKKnWWxwrEdBdcarfSBf8EA83hp2ShJV9WGvPCFUdXP/exec";
 
     const icaoInput = document.getElementById("icaoInput");
     const searchBtn = document.getElementById("searchBtn");
@@ -341,9 +286,6 @@
     const resultEl = document.getElementById("result");
     const favoritesBox = document.getElementById("favoritesBox");
     const resetFavoritesBtn = document.getElementById("resetFavoritesBtn");
-
-    let AIRPORT_DATA = {};
-    let DATA_READY = false;
 
     function sanitizeDialNumber(phone) {
       if (!phone) return "";
@@ -401,8 +343,12 @@
     }
 
     function renderResult(data) {
-      if (!data) {
-        resultEl.innerHTML = `<div class="empty">No data found.</div>`;
+      if (!data || !data.ok) {
+        resultEl.innerHTML = `
+          <div class="empty">
+            ${escapeHtml((data && data.message) || "No data found.")}
+          </div>
+        `;
         return;
       }
 
@@ -444,36 +390,6 @@
       `;
     }
 
-    function searchFbo() {
-      if (!DATA_READY) {
-        setStatus("FBO database is still loading. Please try again in a moment.");
-        return;
-      }
-
-      const icao = icaoInput.value.trim().toUpperCase();
-
-      if (icao.length !== 4) {
-        setStatus("Please enter a 4-letter ICAO code.");
-        resultEl.innerHTML = "";
-        return;
-      }
-
-      const data = AIRPORT_DATA[icao];
-
-      if (!data) {
-        setStatus("No result.");
-        resultEl.innerHTML = `
-          <div class="empty">
-            ICAO ${escapeHtml(icao)} 데이터를 찾지 못했습니다.
-          </div>
-        `;
-        return;
-      }
-
-      renderResult(data);
-      setStatus("Done.");
-    }
-
     async function apiPost(payload) {
       const res = await fetch(SCRIPT_URL, {
         method: "POST",
@@ -486,34 +402,26 @@
       return await res.json();
     }
 
-    function loadAllData() {
-      setStatus("Loading FBO database...");
+    function searchFbo() {
+      const icao = icaoInput.value.trim().toUpperCase();
+
+      if (icao.length !== 4) {
+        setStatus("Please enter a 4-letter ICAO code.");
+        resultEl.innerHTML = "";
+        return;
+      }
+
+      setStatus("Searching...");
       resultEl.innerHTML = `
-        <div class="loading-box">
-          Loading airport/FBO data...
-        </div>
+        <div class="loading-box">Searching ${escapeHtml(icao)}...</div>
       `;
 
-      const callbackName = "jsonpAllCallback_" + Date.now();
+      const callbackName = "jsonpSearchCallback_" + Date.now();
 
       window[callbackName] = function(data) {
         try {
-          if (!data || !data.ok) {
-            setStatus("Failed to load data.");
-            resultEl.innerHTML = `
-              <div class="empty">
-                ${(data && data.message) ? escapeHtml(data.message) : "Failed to load FBO database."}
-              </div>
-            `;
-            return;
-          }
-
-          AIRPORT_DATA = data.airports || {};
-          DATA_READY = true;
-
-          const count = Object.keys(AIRPORT_DATA).length;
-          setStatus(`Ready. ${count} airports loaded.`);
-          resultEl.innerHTML = "";
+          renderResult(data);
+          setStatus(data && data.ok ? "Done." : "No result.");
         } finally {
           delete window[callbackName];
           script.remove();
@@ -521,7 +429,7 @@
       };
 
       const script = document.createElement("script");
-      script.src = `${SCRIPT_URL}?action=all&callback=${callbackName}`;
+      script.src = `${SCRIPT_URL}?action=search&icao=${encodeURIComponent(icao)}&callback=${callbackName}`;
 
       script.onerror = function() {
         setStatus("Request failed.");
@@ -538,6 +446,10 @@
     }
 
     function loadSharedFavorites() {
+      favoritesBox.innerHTML = `
+        <div class="loading-box">Loading shared favorites...</div>
+      `;
+
       const callbackName = "jsonpFavoritesCallback_" + Date.now();
 
       window[callbackName] = function(data) {
@@ -591,7 +503,7 @@
           return;
         }
 
-        await loadSharedFavorites();
+        loadSharedFavorites();
         alert(`Saved: ${item.icao} - ${item.fboName}`);
       } catch (err) {
         alert("Failed to save shared favorite.");
@@ -613,7 +525,7 @@
           return;
         }
 
-        await loadSharedFavorites();
+        loadSharedFavorites();
       } catch (err) {
         alert("Failed to remove favorite.");
       }
@@ -633,7 +545,7 @@
           return;
         }
 
-        await loadSharedFavorites();
+        loadSharedFavorites();
         alert("Shared favorites have been reset.");
       } catch (err) {
         alert("Failed to reset favorites.");
@@ -655,7 +567,6 @@
     window.saveSharedFavorite = saveSharedFavorite;
     window.removeFavorite = removeFavorite;
 
-    loadAllData();
     loadSharedFavorites();
   </script>
 </body>
