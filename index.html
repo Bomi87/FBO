@@ -6,237 +6,348 @@
   <title>FBO Finder</title>
   <style>
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: #f5f7fb;
       color: #1f2937;
     }
+
     .wrap {
       max-width: 980px;
       margin: 0 auto;
-      padding: 24px 16px 48px;
+      padding: 20px 12px 40px;
     }
+
     .card {
       background: #fff;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
       margin-bottom: 18px;
     }
-    h1, h2 { margin: 0 0 8px; }
+
+    h1, h2 {
+      margin: 0 0 8px;
+      letter-spacing: -0.2px;
+    }
+
     h1 { font-size: 28px; }
     h2 { font-size: 22px; }
+
     .sub {
-      margin: 0 0 20px;
+      margin: 0 0 16px;
       color: #6b7280;
       font-size: 14px;
+      line-height: 1.45;
     }
+
     .search-row {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
+
     input[type="text"] {
       flex: 1;
       min-width: 220px;
       height: 46px;
       border: 1px solid #d1d5db;
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 0 14px;
       font-size: 16px;
       text-transform: uppercase;
+      outline: none;
     }
+
+    input[type="text"]:focus {
+      border-color: #94a3b8;
+      box-shadow: 0 0 0 3px rgba(148,163,184,0.12);
+    }
+
     button {
-      height: 46px;
       border: none;
       border-radius: 12px;
-      padding: 0 18px;
-      font-size: 15px;
-      font-weight: 600;
+      padding: 0 16px;
+      font-size: 14px;
+      font-weight: 700;
       cursor: pointer;
+      transition: 0.15s ease;
     }
+
     .primary-btn {
-      background: #2563eb;
+      height: 46px;
+      background: #3b82f6;
       color: white;
     }
+
     .primary-btn:hover {
-      background: #1d4ed8;
+      background: #2563eb;
     }
-    .danger-btn {
-      background: #ef4444;
+
+    .soft-danger-btn {
+      height: 40px;
+      background: #fca5a5;
+      color: #7f1d1d;
+    }
+
+    .soft-danger-btn:hover {
+      background: #f87171;
       color: white;
     }
-    .danger-btn:hover {
-      background: #dc2626;
-    }
+
     .mini-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 38px;
+      min-height: 34px;
       border: none;
       border-radius: 10px;
-      padding: 8px 12px;
+      padding: 7px 12px;
       font-size: 13px;
       font-weight: 700;
       cursor: pointer;
       text-decoration: none;
+      transition: 0.15s ease;
+      white-space: nowrap;
     }
+
     .fav-btn {
-      background: #f59e0b;
-      color: white;
+      background: #fcd34d;
+      color: #78350f;
     }
+
     .fav-btn:hover {
-      background: #d97706;
+      background: #fbbf24;
     }
+
     .remove-btn {
-      background: #ef4444;
-      color: white;
+      background: #fecaca;
+      color: #991b1b;
     }
+
     .remove-btn:hover {
-      background: #dc2626;
+      background: #fca5a5;
     }
+
     .call-btn {
-      background: #10b981;
-      color: white;
+      background: #a7f3d0;
+      color: #065f46;
     }
+
     .call-btn:hover {
-      background: #059669;
+      background: #6ee7b7;
     }
+
     .status {
-      margin: 10px 0 0;
+      margin: 8px 0 0;
       font-size: 14px;
       color: #6b7280;
     }
+
     .result-head {
-      margin-top: 24px;
+      margin-top: 22px;
       margin-bottom: 14px;
     }
+
     .icao {
       display: inline-block;
       padding: 5px 10px;
       border-radius: 999px;
-      background: #e0ecff;
-      color: #1d4ed8;
+      background: #dbeafe;
+      color: #2563eb;
       font-size: 13px;
       font-weight: 700;
       margin-bottom: 10px;
     }
+
     .airport-name {
       font-size: 24px;
-      font-weight: 700;
+      font-weight: 800;
       margin: 0 0 8px;
+      line-height: 1.28;
     }
+
     .count {
       color: #6b7280;
       font-size: 14px;
     }
+
     .fbo-list {
       display: grid;
       gap: 12px;
       margin-top: 18px;
     }
+
     .fbo-item {
       border: 1px solid #e5e7eb;
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 16px;
       background: #fafafa;
     }
+
     .fbo-name {
-      font-size: 18px;
-      font-weight: 700;
+      font-size: 17px;
+      font-weight: 800;
       margin-bottom: 8px;
+      line-height: 1.35;
     }
+
     .phone-text {
       font-size: 15px;
       color: #111827;
       word-break: break-all;
       margin-bottom: 12px;
     }
+
     .action-row {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
     }
+
     .empty {
       margin-top: 8px;
       padding: 16px;
-      border-radius: 12px;
+      border-radius: 14px;
       background: #fff7ed;
       color: #9a3412;
       border: 1px solid #fdba74;
     }
+
     .fav-head {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       gap: 10px;
       flex-wrap: wrap;
       margin-bottom: 12px;
     }
+
     .fav-list {
       display: grid;
       gap: 10px;
     }
+
     .fav-item {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
       gap: 12px;
       flex-wrap: wrap;
       border: 1px solid #e5e7eb;
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 14px;
       background: #f9fafb;
     }
+
     .fav-main {
       flex: 1;
       min-width: 220px;
     }
+
     .fav-route-line {
       font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 5px;
+      font-weight: 800;
+      margin-bottom: 4px;
+      line-height: 1.35;
     }
+
+    .fav-phone-line {
+      font-size: 15px;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 6px;
+      line-height: 1.35;
+    }
+
     .fav-airport-name {
       color: #6b7280;
       font-size: 13px;
+      line-height: 1.4;
     }
+
     .fav-actions {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
+      align-items: center;
     }
+
     .footer-note {
       margin-top: 18px;
       font-size: 12px;
       color: #6b7280;
-      line-height: 1.5;
+      line-height: 1.6;
     }
+
     .loading-box {
       margin-top: 10px;
       padding: 14px;
-      border-radius: 12px;
+      border-radius: 14px;
       background: #eff6ff;
       border: 1px solid #bfdbfe;
       color: #1d4ed8;
       font-size: 14px;
     }
+
     @media (max-width: 640px) {
+      .wrap {
+        padding: 14px 8px 28px;
+      }
+
+      .card {
+        padding: 14px;
+        border-radius: 16px;
+      }
+
       h1 { font-size: 24px; }
-      h2 { font-size: 20px; }
-      .airport-name { font-size: 20px; }
-      .fav-item, .action-row {
+      h2 { font-size: 19px; }
+
+      .airport-name {
+        font-size: 19px;
+      }
+
+      .fbo-name {
+        font-size: 16px;
+      }
+
+      .fav-item,
+      .action-row {
         align-items: stretch;
       }
-      .fav-actions, .action-row {
+
+      .fav-main {
+        min-width: 100%;
+      }
+
+      .fav-route-line {
+        font-size: 15px;
+        margin-bottom: 3px;
+      }
+
+      .fav-phone-line {
+        font-size: 14px;
+        margin-bottom: 6px;
+      }
+
+      .fav-actions,
+      .action-row {
         width: 100%;
       }
-      .fav-actions .mini-btn, .action-row .mini-btn {
+
+      .fav-actions .mini-btn,
+      .action-row .mini-btn {
         flex: 1;
         text-align: center;
+      }
+
+      .soft-danger-btn {
+        height: 38px;
+        padding: 0 12px;
+        font-size: 13px;
       }
     }
   </style>
@@ -252,7 +363,7 @@
             Shared favorites are visible to everyone using this page.
           </div>
         </div>
-        <button id="resetFavoritesBtn" class="danger-btn">Reset Favorites</button>
+        <button id="resetFavoritesBtn" class="soft-danger-btn">⭐ Reset Favorites</button>
       </div>
       <div id="favoritesBox"></div>
     </div>
@@ -270,8 +381,7 @@
       <div id="result"></div>
 
       <div class="footer-note">
-        Clicking Call adds <b>00700</b> before dialing.
-        Example: <code>+1 705-779-3977</code> → <code>0070017057793977</code>
+        Korean numbers (+82 / 0...) are dialed directly. Other international numbers use <b>00700</b>.
       </div>
     </div>
 
@@ -287,32 +397,29 @@
     const favoritesBox = document.getElementById("favoritesBox");
     const resetFavoritesBtn = document.getElementById("resetFavoritesBtn");
 
-  function sanitizeDialNumber(phone) {
-  if (!phone) return "";
+    function sanitizeDialNumber(phone) {
+      if (!phone) return "";
 
-  const raw = String(phone).trim();
-  if (!raw) return "";
+      const raw = String(phone).trim();
+      if (!raw) return "";
 
-  // 공백/하이픈/괄호 제거, 맨 앞 + 는 일단 유지
-  let normalized = raw.replace(/[\s\-\(\)]/g, "");
+      let normalized = raw.replace(/[\s\-\(\)]/g, "");
 
-  // 1) 한국 국제번호(+82)는 00700 없이 그대로 사용
-  if (normalized.startsWith("+82")) {
-    return normalized;
-  }
+      if (normalized.startsWith("+82")) {
+        return normalized;
+      }
 
-  // 2) 이미 국내 형식(0으로 시작)인 번호도 그대로 사용
-  if (normalized.startsWith("0")) {
-    return normalized.replace(/[^\d]/g, "");
-  }
+      if (normalized.startsWith("0")) {
+        return normalized.replace(/[^\d]/g, "");
+      }
 
-  // 3) 그 외 해외번호는 + 제거 후 00700 붙이기
-  normalized = normalized.replace(/^\+/, "");
-  normalized = normalized.replace(/[^\d]/g, "");
+      normalized = normalized.replace(/^\+/, "");
+      normalized = normalized.replace(/[^\d]/g, "");
 
-  if (!normalized) return "";
-  return "00700" + normalized;
-}
+      if (!normalized) return "";
+      return "00700" + normalized;
+    }
+
     function escapeHtml(str) {
       return String(str || "")
         .replace(/&/g, "&amp;")
@@ -340,17 +447,21 @@
 
       const html = list.map(item => {
         const dial = sanitizeDialNumber(item.phone);
+
         return `
           <div class="fav-item">
             <div class="fav-main">
               <div class="fav-route-line">
-                ${escapeHtml(item.icao)}: ${escapeHtml(item.fboName)} ${item.phone ? "(" + escapeHtml(item.phone) + ")" : ""}
+                ${escapeHtml(item.icao)}: ${escapeHtml(item.fboName)}
+              </div>
+              <div class="fav-phone-line">
+                ${item.phone ? `(${escapeHtml(item.phone)})` : ""}
               </div>
               <div class="fav-airport-name">${escapeHtml(item.airportName || "")}</div>
             </div>
             <div class="fav-actions">
-              ${dial ? `<a class="mini-btn call-btn" href="tel:${dial}">Call</a>` : ""}
-              <button class="mini-btn remove-btn" onclick="removeFavorite('${escapeHtml(item.icao)}')">Remove</button>
+              ${dial ? `<a class="mini-btn call-btn" href="tel:${dial}">📞 Call</a>` : ""}
+              <button class="mini-btn remove-btn" onclick="removeFavorite('${escapeHtml(item.icao)}')">🗑️ Remove</button>
             </div>
           </div>
         `;
@@ -388,8 +499,8 @@
             <div class="fbo-name">${escapeHtml(name)}</div>
             <div class="phone-text">${phone ? escapeHtml(phone) : "No phone number"}</div>
             <div class="action-row">
-              ${dial ? `<a class="mini-btn call-btn" href="tel:${dial}">Call</a>` : ""}
-              <button class="mini-btn fav-btn" onclick="saveSharedFavorite('${encoded}')">Add to Shared Favorites</button>
+              ${dial ? `<a class="mini-btn call-btn" href="tel:${dial}">📞 Call</a>` : ""}
+              <button class="mini-btn fav-btn" onclick="saveSharedFavorite('${encoded}')">⭐ Add to Shared Favorites</button>
             </div>
           </div>
         `;
