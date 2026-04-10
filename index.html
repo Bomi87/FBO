@@ -43,6 +43,15 @@
       line-height: 1.45;
     }
 
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
     .search-row {
       display: flex;
       gap: 10px;
@@ -96,6 +105,23 @@
     .soft-danger-btn:hover {
       background: #f87171;
       color: white;
+    }
+
+    .refresh-btn {
+      height: 40px;
+      padding: 0 14px;
+      background: #eef2ff;
+      color: #4338ca;
+      border: 1px solid #c7d2fe;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .refresh-btn:hover {
+      background: #e0e7ff;
     }
 
     .mini-btn {
@@ -349,6 +375,12 @@
         padding: 0 12px;
         font-size: 13px;
       }
+
+      .refresh-btn {
+        height: 36px;
+        padding: 0 12px;
+        font-size: 12px;
+      }
     }
   </style>
 </head>
@@ -359,7 +391,6 @@
       <div class="fav-head">
         <div>
           <h2>Shared Favorite FBOs</h2>
-       
         </div>
         <button id="resetFavoritesBtn" class="soft-danger-btn">⭐ Reset Favorites</button>
       </div>
@@ -367,7 +398,10 @@
     </div>
 
     <div class="card">
-      <h1>FBO Finder</h1>
+      <div class="title-row">
+        <h1>FBO Finder</h1>
+        <button id="refreshBtn" class="refresh-btn" type="button">🔄 Refresh</button>
+      </div>
       <p class="sub">Enter a 4-letter ICAO code to see FBO names and phone numbers.</p>
 
       <div class="search-row">
@@ -394,38 +428,36 @@
     const resultEl = document.getElementById("result");
     const favoritesBox = document.getElementById("favoritesBox");
     const resetFavoritesBtn = document.getElementById("resetFavoritesBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
 
     function sanitizeDialNumber(phone) {
-  if (!phone) return "";
+      if (!phone) return "";
 
-  const raw = String(phone).trim();
-  if (!raw) return "";
+      const raw = String(phone).trim();
+      if (!raw) return "";
 
-  let normalized = raw.replace(/[\s\-\(\)]/g, "");
+      let normalized = raw.replace(/[\s\-\(\)]/g, "");
 
-  // 한국 국제번호(+82) → 국내형식 0으로 변환
-  if (normalized.startsWith("+82")) {
-    let local = normalized.substring(3); // +82 제거
-    local = local.replace(/[^\d]/g, "");
+      if (normalized.startsWith("+82")) {
+        let local = normalized.substring(3);
+        local = local.replace(/[^\d]/g, "");
 
-    if (!local.startsWith("0")) {
-      local = "0" + local;
+        if (!local.startsWith("0")) {
+          local = "0" + local;
+        }
+        return local;
+      }
+
+      if (normalized.startsWith("0")) {
+        return normalized.replace(/[^\d]/g, "");
+      }
+
+      normalized = normalized.replace(/^\+/, "");
+      normalized = normalized.replace(/[^\d]/g, "");
+
+      if (!normalized) return "";
+      return "00700" + normalized;
     }
-    return local;
-  }
-
-  // 이미 국내번호면 그대로
-  if (normalized.startsWith("0")) {
-    return normalized.replace(/[^\d]/g, "");
-  }
-
-  // 그 외 해외번호는 00700 붙이기
-  normalized = normalized.replace(/^\+/, "");
-  normalized = normalized.replace(/[^\d]/g, "");
-
-  if (!normalized) return "";
-  return "00700" + normalized;
-}
 
     function escapeHtml(str) {
       return String(str || "")
@@ -537,7 +569,7 @@
       return await res.json();
     }
 
-    function searchFbo() {
+    function searchFbo(forceRefresh = false) {
       const icao = icaoInput.value.trim().toUpperCase();
 
       if (icao.length !== 4) {
@@ -546,17 +578,18 @@
         return;
       }
 
-      setStatus("Searching...");
+      setStatus(forceRefresh ? "Refreshing search result..." : "Searching...");
       resultEl.innerHTML = `
-        <div class="loading-box">Searching ${escapeHtml(icao)}...</div>
+        <div class="loading-box">${forceRefresh ? "Refreshing" : "Searching"} ${escapeHtml(icao)}...</div>
       `;
 
       const callbackName = "jsonpSearchCallback_" + Date.now();
+      const cacheBust = `_ts=${Date.now()}`;
 
       window[callbackName] = function(data) {
         try {
           renderResult(data);
-          setStatus(data && data.ok ? "Done." : "No result.");
+          setStatus(data && data.ok ? (forceRefresh ? "Refreshed." : "Done.") : "No result.");
         } finally {
           delete window[callbackName];
           script.remove();
@@ -564,7 +597,7 @@
       };
 
       const script = document.createElement("script");
-      script.src = `${SCRIPT_URL}?action=search&icao=${encodeURIComponent(icao)}&callback=${callbackName}`;
+      script.src = `${SCRIPT_URL}?action=search&icao=${encodeURIComponent(icao)}&callback=${callbackName}&${cacheBust}`;
 
       script.onerror = function() {
         setStatus("Request failed.");
@@ -580,12 +613,13 @@
       document.body.appendChild(script);
     }
 
-    function loadSharedFavorites() {
+    function loadSharedFavorites(forceRefresh = false) {
       favoritesBox.innerHTML = `
-        <div class="loading-box">Loading shared favorites...</div>
+        <div class="loading-box">${forceRefresh ? "Refreshing" : "Loading"} shared favorites...</div>
       `;
 
       const callbackName = "jsonpFavoritesCallback_" + Date.now();
+      const cacheBust = `_ts=${Date.now()}`;
 
       window[callbackName] = function(data) {
         try {
@@ -606,7 +640,7 @@
       };
 
       const script = document.createElement("script");
-      script.src = `${SCRIPT_URL}?action=favorites&callback=${callbackName}`;
+      script.src = `${SCRIPT_URL}?action=favorites&callback=${callbackName}&${cacheBust}`;
 
       script.onerror = function() {
         favoritesBox.innerHTML = `
@@ -619,6 +653,19 @@
       };
 
       document.body.appendChild(script);
+    }
+
+    function refreshAll() {
+      setStatus("Refreshing...");
+
+      loadSharedFavorites(true);
+
+      const icao = icaoInput.value.trim().toUpperCase();
+      if (icao.length === 4) {
+        searchFbo(true);
+      } else {
+        setStatus("Favorites refreshed.");
+      }
     }
 
     async function saveSharedFavorite(encoded) {
@@ -638,7 +685,7 @@
           return;
         }
 
-        loadSharedFavorites();
+        loadSharedFavorites(true);
         alert(`Saved: ${item.icao} - ${item.fboName}`);
       } catch (err) {
         alert("Failed to save shared favorite.");
@@ -660,7 +707,7 @@
           return;
         }
 
-        loadSharedFavorites();
+        loadSharedFavorites(true);
       } catch (err) {
         alert("Failed to remove favorite.");
       }
@@ -680,17 +727,21 @@
           return;
         }
 
-        loadSharedFavorites();
+        loadSharedFavorites(true);
         alert("Shared favorites have been reset.");
       } catch (err) {
         alert("Failed to reset favorites.");
       }
     }
 
-    searchBtn.addEventListener("click", searchFbo);
+    searchBtn.addEventListener("click", function() {
+      searchFbo(false);
+    });
+
+    refreshBtn.addEventListener("click", refreshAll);
 
     icaoInput.addEventListener("keydown", function(e) {
-      if (e.key === "Enter") searchFbo();
+      if (e.key === "Enter") searchFbo(false);
     });
 
     icaoInput.addEventListener("input", function() {
@@ -702,7 +753,7 @@
     window.saveSharedFavorite = saveSharedFavorite;
     window.removeFavorite = removeFavorite;
 
-    loadSharedFavorites();
+    loadSharedFavorites(false);
   </script>
 </body>
 </html>
