@@ -167,15 +167,6 @@
       background: #6ee7b7;
     }
 
-    .map-btn {
-      background: #dbeafe;
-      color: #1d4ed8;
-    }
-
-    .map-btn:hover {
-      background: #bfdbfe;
-    }
-
     .status {
       margin: 8px 0 0;
       font-size: 14px;
@@ -439,12 +430,6 @@
     const resetFavoritesBtn = document.getElementById("resetFavoritesBtn");
     const refreshBtn = document.getElementById("refreshBtn");
 
-    // FBO 이름 검색이 잘 안 잡히는 공항은 여기 추가
-    // 이 공항들은 "ICAO airport"만 origin으로 사용
-    const AIRPORT_ONLY_MAP_ICAOS = new Set([
-      "KSJC"
-    ]);
-
     function sanitizeDialNumber(phone) {
       if (!phone) return "";
 
@@ -485,44 +470,6 @@
 
     function setStatus(msg) {
       statusEl.textContent = msg;
-    }
-
-    function buildGoogleMapsDirUrl(originQuery) {
-      return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originQuery)}&travelmode=driving`;
-    }
-
-    function getMapOriginQuery(item) {
-      const icao = String(item.icao || "").trim().toUpperCase();
-      const fboName = String(item.fboName || "").trim();
-
-      if (!icao) return "";
-
-      if (AIRPORT_ONLY_MAP_ICAOS.has(icao)) {
-        return `${icao} airport`;
-      }
-
-      if (fboName) {
-        return `${icao} airport ${fboName}`;
-      }
-
-      return `${icao} airport`;
-    }
-
-    function openGoogleMap(encoded) {
-      try {
-        const item = JSON.parse(decodeURIComponent(encoded));
-        const originQuery = getMapOriginQuery(item);
-
-        if (!originQuery) {
-          alert("지도 검색어를 만들 수 없습니다.");
-          return;
-        }
-
-        const url = buildGoogleMapsDirUrl(originQuery);
-        window.open(url, "_blank");
-      } catch (err) {
-        alert("구글지도를 여는 데 실패했습니다.");
-      }
     }
 
     function renderFavorites(favorites) {
@@ -592,7 +539,6 @@
             <div class="phone-text">${phone ? escapeHtml(phone) : "No phone number"}</div>
             <div class="action-row">
               ${dial ? `<a class="mini-btn call-btn" href="tel:${dial}">📞 Call</a>` : ""}
-              <button class="mini-btn map-btn" onclick="openGoogleMap('${encoded}')">🗺️ Map</button>
               <button class="mini-btn fav-btn" onclick="saveSharedFavorite('${encoded}')">⭐ Add to Shared Favorites</button>
             </div>
           </div>
@@ -638,6 +584,7 @@
       `;
 
       const callbackName = "jsonpSearchCallback_" + Date.now();
+      const cacheBust = `_ts=${Date.now()}`;
 
       window[callbackName] = function(data) {
         try {
@@ -650,7 +597,7 @@
       };
 
       const script = document.createElement("script");
-      script.src = `${SCRIPT_URL}?action=search&icao=${encodeURIComponent(icao)}&force=${forceRefresh ? "1" : "0"}&callback=${callbackName}&_ts=${Date.now()}`;
+     script.src = `${SCRIPT_URL}?action=search&icao=${encodeURIComponent(icao)}&force=${forceRefresh ? "1" : "0"}&callback=${callbackName}&_ts=${Date.now()}`;
 
       script.onerror = function() {
         setStatus("Request failed.");
@@ -805,7 +752,6 @@
 
     window.saveSharedFavorite = saveSharedFavorite;
     window.removeFavorite = removeFavorite;
-    window.openGoogleMap = openGoogleMap;
 
     loadSharedFavorites(false);
   </script>
