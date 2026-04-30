@@ -420,7 +420,7 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzb3hTae8Ka_Bvi475g-jKvpRUrbDvUrnQ7SAv_Om8CfcNdgMDLqH68Gs8wMf_IO0NC/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx-pjjtuzqYtYy0OmNqVD6_bm5EfZNx5IWjIi8NUDE-q6tphWSDAIk2qC0xHl0rAq8K/exec";
 
     const icaoInput = document.getElementById("icaoInput");
     const searchBtn = document.getElementById("searchBtn");
@@ -500,7 +500,7 @@
             </div>
             <div class="fav-actions">
               ${dial ? `<a class="mini-btn call-btn" href="tel:${dial}">📞 Call</a>` : ""}
-              <button class="mini-btn remove-btn" onclick="removeFavorite('${escapeHtml(item.icao)}')">🗑️ Remove</button>
+             <button class="mini-btn remove-btn" onclick="removeFavorite('${escapeHtml(item.icao)}', '${escapeHtml(item.fboName)}', '${escapeHtml(item.phone || "")}')">🗑️ Remove</button>
             </div>
           </div>
         `;
@@ -692,26 +692,28 @@
       }
     }
 
-    async function removeFavorite(icao) {
-      try {
-        const ok = confirm(`Remove shared favorite for ${icao}?`);
-        if (!ok) return;
+  async function removeFavorite(icao, fboName, phone) {
+  try {
+    const ok = confirm(`Remove shared favorite for ${icao} - ${fboName}?`);
+    if (!ok) return;
 
-        const result = await apiPost({
-          action: "removeFavorite",
-          icao: icao
-        });
+    const result = await apiPost({
+      action: "removeFavorite",
+      icao: icao,
+      fboName: fboName,
+      phone: phone
+    });
 
-        if (!result.ok) {
-          alert(result.message || "Failed to remove favorite.");
-          return;
-        }
-
-        loadSharedFavorites(true);
-      } catch (err) {
-        alert("Failed to remove favorite.");
-      }
+    if (!result.ok) {
+      alert(result.message || "Failed to remove favorite.");
+      return;
     }
+
+    loadSharedFavorites(true);
+  } catch (err) {
+    alert("Failed to remove favorite.");
+  }
+}
 
     async function resetFavorites() {
       try {
