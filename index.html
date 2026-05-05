@@ -385,377 +385,408 @@
   </style>
 </head>
 <body>
-  <div class="wrap">
-
-    <div class="card">
-      <div class="fav-head">
-        <div>
-          <h2>Shared Favorite FBOs</h2>
-        </div>
-        <button id="resetFavoritesBtn" class="soft-danger-btn">⭐ Reset Favorites</button>
-      </div>
-      <div id="favoritesBox"></div>
-    </div>
-
-    <div class="card">
-      <div class="title-row">
-        <h1>FBO Finder</h1>
-        <button id="refreshBtn" class="refresh-btn" type="button">🔄 Refresh</button>
-      </div>
-      <p class="sub">Enter a 4-letter ICAO code to see FBO names and phone numbers.</p>
-
-      <div class="search-row">
-        <input type="text" id="icaoInput" maxlength="4" placeholder="e.g. RKSS, PANC, KEWR" />
-        <button id="searchBtn" class="primary-btn">Search</button>
-      </div>
-
-      <div class="status" id="status">Ready.</div>
-      <div id="result"></div>
-
-      <div class="footer-note">
-        Korean numbers (+82 / 0...) are dialed directly. Other international numbers use <b>00700</b>.
-      </div>
-    </div>
-
+  <div id="authScreen" style="
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background:#f4f7fb;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans KR',Arial,sans-serif;
+  ">
+    승인 확인 중...
   </div>
 
-  <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx-pjjtuzqYtYy0OmNqVD6_bm5EfZNx5IWjIi8NUDE-q6tphWSDAIk2qC0xHl0rAq8K/exec";
+  <div id="appRoot" style="display:none;">
+    <div class="wrap">
 
-    const icaoInput = document.getElementById("icaoInput");
-    const searchBtn = document.getElementById("searchBtn");
-    const statusEl = document.getElementById("status");
-    const resultEl = document.getElementById("result");
-    const favoritesBox = document.getElementById("favoritesBox");
-    const resetFavoritesBtn = document.getElementById("resetFavoritesBtn");
-    const refreshBtn = document.getElementById("refreshBtn");
+      <div class="card">
+        <div class="fav-head">
+          <div>
+            <h2>Shared Favorite FBOs</h2>
+          </div>
+          <button id="resetFavoritesBtn" class="soft-danger-btn">⭐ Reset Favorites</button>
+        </div>
+        <div id="favoritesBox"></div>
+      </div>
 
-    function sanitizeDialNumber(phone) {
-      if (!phone) return "";
+      <div class="card">
+        <div class="title-row">
+          <h1>FBO Finder</h1>
+          <button id="refreshBtn" class="refresh-btn" type="button">🔄 Refresh</button>
+        </div>
+        <p class="sub">Enter a 4-letter ICAO code to see FBO names and phone numbers.</p>
 
-      const raw = String(phone).trim();
-      if (!raw) return "";
+        <div class="search-row">
+          <input type="text" id="icaoInput" maxlength="4" placeholder="e.g. RKSS, PANC, KEWR" />
+          <button id="searchBtn" class="primary-btn">Search</button>
+        </div>
 
-      let normalized = raw.replace(/[\s\-\(\)]/g, "");
+        <div class="status" id="status">Ready.</div>
+        <div id="result"></div>
 
-      if (normalized.startsWith("+82")) {
-        let local = normalized.substring(3);
-        local = local.replace(/[^\d]/g, "");
+        <div class="footer-note">
+          Korean numbers (+82 / 0...) are dialed directly. Other international numbers use <b>00700</b>.
+        </div>
+      </div>
 
-        if (!local.startsWith("0")) {
-          local = "0" + local;
+    </div>
+
+    <script>
+      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx-pjjtuzqYtYy0OmNqVD6_bm5EfZNx5IWjIi8NUDE-q6tphWSDAIk2qC0xHl0rAq8K/exec";
+
+      const icaoInput = document.getElementById("icaoInput");
+      const searchBtn = document.getElementById("searchBtn");
+      const statusEl = document.getElementById("status");
+      const resultEl = document.getElementById("result");
+      const favoritesBox = document.getElementById("favoritesBox");
+      const resetFavoritesBtn = document.getElementById("resetFavoritesBtn");
+      const refreshBtn = document.getElementById("refreshBtn");
+
+      let FBO_APP_STARTED = false;
+
+      function sanitizeDialNumber(phone) {
+        if (!phone) return "";
+
+        const raw = String(phone).trim();
+        if (!raw) return "";
+
+        let normalized = raw.replace(/[\s\-\(\)]/g, "");
+
+        if (normalized.startsWith("+82")) {
+          let local = normalized.substring(3);
+          local = local.replace(/[^\d]/g, "");
+
+          if (!local.startsWith("0")) {
+            local = "0" + local;
+          }
+          return local;
         }
-        return local;
+
+        if (normalized.startsWith("0")) {
+          return normalized.replace(/[^\d]/g, "");
+        }
+
+        normalized = normalized.replace(/^\+/, "");
+        normalized = normalized.replace(/[^\d]/g, "");
+
+        if (!normalized) return "";
+        return "00700" + normalized;
       }
 
-      if (normalized.startsWith("0")) {
-        return normalized.replace(/[^\d]/g, "");
+      function escapeHtml(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
       }
 
-      normalized = normalized.replace(/^\+/, "");
-      normalized = normalized.replace(/[^\d]/g, "");
-
-      if (!normalized) return "";
-      return "00700" + normalized;
-    }
-
-    function escapeHtml(str) {
-      return String(str || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-    }
-
-    function setStatus(msg) {
-      statusEl.textContent = msg;
-    }
-
-    function renderFavorites(favorites) {
-      const list = Array.isArray(favorites) ? favorites : [];
-
-      if (!list.length) {
-        favoritesBox.innerHTML = `
-          <div class="empty">
-            No shared favorites saved yet.
-          </div>
-        `;
-        return;
+      function setStatus(msg) {
+        statusEl.textContent = msg;
       }
 
-      const html = list.map(item => {
-        const dial = sanitizeDialNumber(item.phone);
+      function renderFavorites(favorites) {
+        const list = Array.isArray(favorites) ? favorites : [];
 
-        return `
-          <div class="fav-item">
-            <div class="fav-main">
-              <div class="fav-route-line">
-                ${escapeHtml(item.icao)}: ${escapeHtml(item.fboName)}
-              </div>
-              <div class="fav-phone-line">
-                ${item.phone ? `(${escapeHtml(item.phone)})` : ""}
-              </div>
-              <div class="fav-airport-name">${escapeHtml(item.airportName || "")}</div>
+        if (!list.length) {
+          favoritesBox.innerHTML = `
+            <div class="empty">
+              No shared favorites saved yet.
             </div>
-            <div class="fav-actions">
-              ${dial ? `<a class="mini-btn call-btn" href="tel:${dial}">📞 Call</a>` : ""}
-             <button class="mini-btn remove-btn" onclick="removeFavorite('${escapeHtml(item.icao)}', '${escapeHtml(item.fboName)}', '${escapeHtml(item.phone || "")}')">🗑️ Remove</button>
+          `;
+          return;
+        }
+
+        const html = list.map(item => {
+          const dial = sanitizeDialNumber(item.phone);
+
+          return `
+            <div class="fav-item">
+              <div class="fav-main">
+                <div class="fav-route-line">
+                  ${escapeHtml(item.icao)}: ${escapeHtml(item.fboName)}
+                </div>
+                <div class="fav-phone-line">
+                  ${item.phone ? `(${escapeHtml(item.phone)})` : ""}
+                </div>
+                <div class="fav-airport-name">${escapeHtml(item.airportName || "")}</div>
+              </div>
+              <div class="fav-actions">
+                ${dial ? `<a class="mini-btn call-btn" href="tel:${dial}">📞 Call</a>` : ""}
+               <button class="mini-btn remove-btn" onclick="removeFavorite('${escapeHtml(item.icao)}', '${escapeHtml(item.fboName)}', '${escapeHtml(item.phone || "")}')">🗑️ Remove</button>
+              </div>
             </div>
-          </div>
-        `;
-      }).join("");
+          `;
+        }).join("");
 
-      favoritesBox.innerHTML = `<div class="fav-list">${html}</div>`;
-    }
+        favoritesBox.innerHTML = `<div class="fav-list">${html}</div>`;
+      }
 
-    function renderResult(data) {
-      if (!data || !data.ok) {
+      function renderResult(data) {
+        if (!data || !data.ok) {
+          resultEl.innerHTML = `
+            <div class="empty">
+              ${escapeHtml((data && data.message) || "No data found.")}
+            </div>
+          `;
+          return;
+        }
+
+        const fboHtml = (data.fbos || []).map(item => {
+          const name = item.name || "(No FBO Name)";
+          const phone = item.phone || "";
+          const dial = sanitizeDialNumber(phone);
+
+          const payload = {
+            icao: data.icao || "",
+            airportName: data.airportName || "",
+            fboName: name,
+            phone: phone
+          };
+
+          const encoded = encodeURIComponent(JSON.stringify(payload));
+
+          return `
+            <div class="fbo-item">
+              <div class="fbo-name">${escapeHtml(name)}</div>
+              <div class="phone-text">${phone ? escapeHtml(phone) : "No phone number"}</div>
+              <div class="action-row">
+                ${dial ? `<a class="mini-btn call-btn" href="tel:${dial}">📞 Call</a>` : ""}
+                <button class="mini-btn fav-btn" onclick="saveSharedFavorite('${encoded}')">⭐ Add to Shared Favorites</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+
         resultEl.innerHTML = `
-          <div class="empty">
-            ${escapeHtml((data && data.message) || "No data found.")}
+          <div class="result-head">
+            <div class="icao">${escapeHtml(data.icao)}</div>
+            <div class="airport-name">${escapeHtml(data.airportName || "Unknown Airport")}</div>
+            <div class="count">FBO count: ${data.count || 0}</div>
+          </div>
+          <div class="fbo-list">
+            ${fboHtml || `<div class="empty">No FBO information available.</div>`}
           </div>
         `;
-        return;
       }
 
-      const fboHtml = (data.fbos || []).map(item => {
-        const name = item.name || "(No FBO Name)";
-        const phone = item.phone || "";
-        const dial = sanitizeDialNumber(phone);
+      async function apiPost(payload) {
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify(payload)
+        });
 
-        const payload = {
-          icao: data.icao || "",
-          airportName: data.airportName || "",
-          fboName: name,
-          phone: phone
+        return await res.json();
+      }
+
+      function searchFbo(forceRefresh = false) {
+        const icao = icaoInput.value.trim().toUpperCase();
+
+        if (icao.length !== 4) {
+          setStatus("Please enter a 4-letter ICAO code.");
+          resultEl.innerHTML = "";
+          return;
+        }
+
+        setStatus(forceRefresh ? "Refreshing search result..." : "Searching...");
+        resultEl.innerHTML = `
+          <div class="loading-box">${forceRefresh ? "Refreshing" : "Searching"} ${escapeHtml(icao)}...</div>
+        `;
+
+        const callbackName = "jsonpSearchCallback_" + Date.now();
+
+        window[callbackName] = function(data) {
+          try {
+            renderResult(data);
+            setStatus(data && data.ok ? (forceRefresh ? "Refreshed." : "Done.") : "No result.");
+          } finally {
+            delete window[callbackName];
+            script.remove();
+          }
         };
 
-        const encoded = encodeURIComponent(JSON.stringify(payload));
+        const script = document.createElement("script");
+       script.src = `${SCRIPT_URL}?action=search&icao=${encodeURIComponent(icao)}&force=${forceRefresh ? "1" : "0"}&callback=${callbackName}&_ts=${Date.now()}`;
 
-        return `
-          <div class="fbo-item">
-            <div class="fbo-name">${escapeHtml(name)}</div>
-            <div class="phone-text">${phone ? escapeHtml(phone) : "No phone number"}</div>
-            <div class="action-row">
-              ${dial ? `<a class="mini-btn call-btn" href="tel:${dial}">📞 Call</a>` : ""}
-              <button class="mini-btn fav-btn" onclick="saveSharedFavorite('${encoded}')">⭐ Add to Shared Favorites</button>
+        script.onerror = function() {
+          setStatus("Request failed.");
+          resultEl.innerHTML = `
+            <div class="empty">
+              Failed to load data. Check the Apps Script deployment URL.
             </div>
-          </div>
-        `;
-      }).join("");
-
-      resultEl.innerHTML = `
-        <div class="result-head">
-          <div class="icao">${escapeHtml(data.icao)}</div>
-          <div class="airport-name">${escapeHtml(data.airportName || "Unknown Airport")}</div>
-          <div class="count">FBO count: ${data.count || 0}</div>
-        </div>
-        <div class="fbo-list">
-          ${fboHtml || `<div class="empty">No FBO information available.</div>`}
-        </div>
-      `;
-    }
-
-    async function apiPost(payload) {
-      const res = await fetch(SCRIPT_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8"
-        },
-        body: JSON.stringify(payload)
-      });
-
-      return await res.json();
-    }
-
-    function searchFbo(forceRefresh = false) {
-      const icao = icaoInput.value.trim().toUpperCase();
-
-      if (icao.length !== 4) {
-        setStatus("Please enter a 4-letter ICAO code.");
-        resultEl.innerHTML = "";
-        return;
-      }
-
-      setStatus(forceRefresh ? "Refreshing search result..." : "Searching...");
-      resultEl.innerHTML = `
-        <div class="loading-box">${forceRefresh ? "Refreshing" : "Searching"} ${escapeHtml(icao)}...</div>
-      `;
-
-      const callbackName = "jsonpSearchCallback_" + Date.now();
-      const cacheBust = `_ts=${Date.now()}`;
-
-      window[callbackName] = function(data) {
-        try {
-          renderResult(data);
-          setStatus(data && data.ok ? (forceRefresh ? "Refreshed." : "Done.") : "No result.");
-        } finally {
+          `;
           delete window[callbackName];
           script.remove();
-        }
-      };
+        };
 
-      const script = document.createElement("script");
-     script.src = `${SCRIPT_URL}?action=search&icao=${encodeURIComponent(icao)}&force=${forceRefresh ? "1" : "0"}&callback=${callbackName}&_ts=${Date.now()}`;
+        document.body.appendChild(script);
+      }
 
-      script.onerror = function() {
-        setStatus("Request failed.");
-        resultEl.innerHTML = `
-          <div class="empty">
-            Failed to load data. Check the Apps Script deployment URL.
-          </div>
+      function loadSharedFavorites(forceRefresh = false) {
+        favoritesBox.innerHTML = `
+          <div class="loading-box">${forceRefresh ? "Refreshing" : "Loading"} shared favorites...</div>
         `;
-        delete window[callbackName];
-        script.remove();
-      };
 
-      document.body.appendChild(script);
-    }
+        const callbackName = "jsonpFavoritesCallback_" + Date.now();
+        const cacheBust = `_ts=${Date.now()}`;
 
-    function loadSharedFavorites(forceRefresh = false) {
-      favoritesBox.innerHTML = `
-        <div class="loading-box">${forceRefresh ? "Refreshing" : "Loading"} shared favorites...</div>
-      `;
+        window[callbackName] = function(data) {
+          try {
+            if (!data || !data.ok) {
+              favoritesBox.innerHTML = `
+                <div class="empty">
+                  Failed to load shared favorites.
+                </div>
+              `;
+              return;
+            }
 
-      const callbackName = "jsonpFavoritesCallback_" + Date.now();
-      const cacheBust = `_ts=${Date.now()}`;
+            renderFavorites(data.favorites || []);
+          } finally {
+            delete window[callbackName];
+            script.remove();
+          }
+        };
 
-      window[callbackName] = function(data) {
+        const script = document.createElement("script");
+        script.src = `${SCRIPT_URL}?action=favorites&callback=${callbackName}&${cacheBust}`;
+
+        script.onerror = function() {
+          favoritesBox.innerHTML = `
+            <div class="empty">
+              Failed to load shared favorites.
+            </div>
+          `;
+          delete window[callbackName];
+          script.remove();
+        };
+
+        document.body.appendChild(script);
+      }
+
+      function refreshAll() {
+        setStatus("Refreshing...");
+
+        loadSharedFavorites(true);
+
+        const icao = icaoInput.value.trim().toUpperCase();
+        if (icao.length === 4) {
+          searchFbo(true);
+        } else {
+          setStatus("Favorites refreshed.");
+        }
+      }
+
+      async function saveSharedFavorite(encoded) {
         try {
-          if (!data || !data.ok) {
-            favoritesBox.innerHTML = `
-              <div class="empty">
-                Failed to load shared favorites.
-              </div>
-            `;
+          const item = JSON.parse(decodeURIComponent(encoded));
+
+          const result = await apiPost({
+            action: "saveFavorite",
+            icao: item.icao,
+            airportName: item.airportName,
+            fboName: item.fboName,
+            phone: item.phone
+          });
+
+          if (!result.ok) {
+            alert(result.message || "Failed to save shared favorite.");
             return;
           }
 
-          renderFavorites(data.favorites || []);
-        } finally {
-          delete window[callbackName];
-          script.remove();
+          loadSharedFavorites(true);
+          alert(`Saved: ${item.icao} - ${item.fboName}`);
+        } catch (err) {
+          alert("Failed to save shared favorite.");
         }
-      };
+      }
 
-      const script = document.createElement("script");
-      script.src = `${SCRIPT_URL}?action=favorites&callback=${callbackName}&${cacheBust}`;
+    async function removeFavorite(icao, fboName, phone) {
+    try {
+      const ok = confirm(`Remove shared favorite for ${icao} - ${fboName}?`);
+      if (!ok) return;
 
-      script.onerror = function() {
-        favoritesBox.innerHTML = `
-          <div class="empty">
-            Failed to load shared favorites.
-          </div>
-        `;
-        delete window[callbackName];
-        script.remove();
-      };
+      const result = await apiPost({
+        action: "removeFavorite",
+        icao: icao,
+        fboName: fboName,
+        phone: phone
+      });
 
-      document.body.appendChild(script);
-    }
-
-    function refreshAll() {
-      setStatus("Refreshing...");
+      if (!result.ok) {
+        alert(result.message || "Failed to remove favorite.");
+        return;
+      }
 
       loadSharedFavorites(true);
-
-      const icao = icaoInput.value.trim().toUpperCase();
-      if (icao.length === 4) {
-        searchFbo(true);
-      } else {
-        setStatus("Favorites refreshed.");
-      }
+    } catch (err) {
+      alert("Failed to remove favorite.");
     }
-
-    async function saveSharedFavorite(encoded) {
-      try {
-        const item = JSON.parse(decodeURIComponent(encoded));
-
-        const result = await apiPost({
-          action: "saveFavorite",
-          icao: item.icao,
-          airportName: item.airportName,
-          fboName: item.fboName,
-          phone: item.phone
-        });
-
-        if (!result.ok) {
-          alert(result.message || "Failed to save shared favorite.");
-          return;
-        }
-
-        loadSharedFavorites(true);
-        alert(`Saved: ${item.icao} - ${item.fboName}`);
-      } catch (err) {
-        alert("Failed to save shared favorite.");
-      }
-    }
-
-  async function removeFavorite(icao, fboName, phone) {
-  try {
-    const ok = confirm(`Remove shared favorite for ${icao} - ${fboName}?`);
-    if (!ok) return;
-
-    const result = await apiPost({
-      action: "removeFavorite",
-      icao: icao,
-      fboName: fboName,
-      phone: phone
-    });
-
-    if (!result.ok) {
-      alert(result.message || "Failed to remove favorite.");
-      return;
-    }
-
-    loadSharedFavorites(true);
-  } catch (err) {
-    alert("Failed to remove favorite.");
   }
-}
 
-    async function resetFavorites() {
-      try {
-        const ok = confirm("Are you sure you want to reset all shared favorites?");
-        if (!ok) return;
+      async function resetFavorites() {
+        try {
+          const ok = confirm("Are you sure you want to reset all shared favorites?");
+          if (!ok) return;
 
-        const result = await apiPost({
-          action: "resetFavorites"
-        });
+          const result = await apiPost({
+            action: "resetFavorites"
+          });
 
-        if (!result.ok) {
-          alert(result.message || "Failed to reset favorites.");
+          if (!result.ok) {
+            alert(result.message || "Failed to reset favorites.");
+            return;
+          }
+
+          loadSharedFavorites(true);
+          alert("Shared favorites have been reset.");
+        } catch (err) {
+          alert("Failed to reset favorites.");
+        }
+      }
+
+      searchBtn.addEventListener("click", function() {
+        searchFbo(false);
+      });
+
+      refreshBtn.addEventListener("click", refreshAll);
+
+      icaoInput.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") searchFbo(false);
+      });
+
+      icaoInput.addEventListener("input", function() {
+        this.value = this.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 4);
+      });
+
+      resetFavoritesBtn.addEventListener("click", resetFavorites);
+
+      window.saveSharedFavorite = saveSharedFavorite;
+      window.removeFavorite = removeFavorite;
+
+      function startFboAppAfterAuth() {
+        if (FBO_APP_STARTED) return;
+        FBO_APP_STARTED = true;
+        loadSharedFavorites(false);
+      }
+
+      (function waitForPortalAuth() {
+        if (window.CURRENT_PORTAL_USER) {
+          startFboAppAfterAuth();
           return;
         }
 
-        loadSharedFavorites(true);
-        alert("Shared favorites have been reset.");
-      } catch (err) {
-        alert("Failed to reset favorites.");
-      }
-    }
+        setTimeout(waitForPortalAuth, 200);
+      })();
+    </script>
+  </div>
 
-    searchBtn.addEventListener("click", function() {
-      searchFbo(false);
-    });
-
-    refreshBtn.addEventListener("click", refreshAll);
-
-    icaoInput.addEventListener("keydown", function(e) {
-      if (e.key === "Enter") searchFbo(false);
-    });
-
-    icaoInput.addEventListener("input", function() {
-      this.value = this.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 4);
-    });
-
-    resetFavoritesBtn.addEventListener("click", resetFavorites);
-
-    window.saveSharedFavorite = saveSharedFavorite;
-    window.removeFavorite = removeFavorite;
-
-    loadSharedFavorites(false);
-  </script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://bomi87.github.io/SK-Aviation-portal/common-auth.js"></script>
 </body>
 </html>
