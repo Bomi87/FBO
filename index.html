@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>FBO Finder</title>
 
 <style>
@@ -29,6 +29,11 @@
     --danger-text: #b91c1c;
   }
 
+html, body {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+  
   body {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -123,7 +128,7 @@
     border: 1px solid #cbd5e1;
     border-radius: 12px;
     padding: 0 14px;
-    font-size: 16px;
+  font-size: 16px !important;
     font-weight: 700;
     text-transform: uppercase;
     outline: none;
