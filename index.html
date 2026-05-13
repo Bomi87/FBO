@@ -4,385 +4,434 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FBO Finder</title>
-  <style>
-    * { box-sizing: border-box; }
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f7fb;
-      color: #1f2937;
-    }
+<style>
+  * { box-sizing: border-box; }
 
+  :root {
+    --bg: #f3f6fb;
+    --card: #ffffff;
+    --text: #111827;
+    --muted: #64748b;
+    --line: #e2e8f0;
+
+    --primary: #1e40af;
+    --primary-hover: #1d4ed8;
+    --primary-soft: #eaf1ff;
+
+    --success-bg: #e7f8ef;
+    --success-text: #047857;
+
+    --fav-bg: #fff4d6;
+    --fav-text: #92400e;
+
+    --danger-bg: #fee2e2;
+    --danger-text: #b91c1c;
+  }
+
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 22px 12px 40px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+    margin-bottom: 16px;
+  }
+
+  h1, h2 {
+    margin: 0 0 8px;
+    letter-spacing: -0.3px;
+    color: #0f172a;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 800;
+  }
+
+  h2 {
+    font-size: 21px;
+    font-weight: 800;
+  }
+
+  .sub {
+    margin: 0 0 16px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .search-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    height: 46px;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 0 14px;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    outline: none;
+    background: #ffffff;
+    color: #0f172a;
+  }
+
+  input[type="text"]:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.12);
+  }
+
+  button {
+    border: none;
+    border-radius: 12px;
+    padding: 0 16px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.15s ease;
+  }
+
+  button:hover,
+  .mini-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .primary-btn {
+    height: 46px;
+    min-width: 104px;
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 6px 14px rgba(30, 64, 175, 0.18);
+  }
+
+  .primary-btn:hover {
+    background: var(--primary-hover);
+  }
+
+  .soft-danger-btn {
+    height: 40px;
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border: 1px solid #fecaca;
+  }
+
+  .soft-danger-btn:hover {
+    background: #fecaca;
+  }
+
+  .refresh-btn {
+    height: 40px;
+    padding: 0 14px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    border: 1px solid #c7d2fe;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .refresh-btn:hover {
+    background: #dbeafe;
+  }
+
+  .mini-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 7px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .fav-btn {
+    background: var(--fav-bg);
+    color: var(--fav-text);
+    border-color: #fde68a;
+  }
+
+  .fav-btn:hover {
+    background: #fde68a;
+  }
+
+  .remove-btn {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-color: #fecaca;
+  }
+
+  .remove-btn:hover {
+    background: #fecaca;
+  }
+
+  .call-btn {
+    background: var(--success-bg);
+    color: var(--success-text);
+    border-color: #bbf7d0;
+  }
+
+  .call-btn:hover {
+    background: #d1fae5;
+  }
+
+  .status {
+    margin: 8px 0 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .result-head {
+    margin-top: 20px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .icao {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 10px;
+  }
+
+  .airport-name {
+    font-size: 23px;
+    font-weight: 800;
+    margin: 0 0 6px;
+    line-height: 1.28;
+    color: #0f172a;
+  }
+
+  .count {
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .fbo-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .fbo-item {
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    padding: 15px;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.035);
+  }
+
+  .fbo-name {
+    font-size: 17px;
+    font-weight: 800;
+    margin-bottom: 7px;
+    line-height: 1.35;
+    color: #111827;
+  }
+
+  .phone-text {
+    font-size: 15px;
+    color: #334155;
+    word-break: break-all;
+    margin-bottom: 12px;
+  }
+
+  .action-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .empty {
+    margin-top: 8px;
+    padding: 15px;
+    border-radius: 14px;
+    background: #fff7ed;
+    color: #9a3412;
+    border: 1px solid #fed7aa;
+    font-size: 14px;
+  }
+
+  .fav-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .fav-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .fav-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    padding: 14px;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.035);
+  }
+
+  .fav-main {
+    min-width: 0;
+  }
+
+  .fav-route-line {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    line-height: 1.35;
+    color: #111827;
+  }
+
+  .fav-phone-line {
+    font-size: 14px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 5px;
+    line-height: 1.35;
+  }
+
+  .fav-airport-name {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .fav-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .footer-note {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+
+  .loading-box {
+    margin-top: 10px;
+    padding: 14px;
+    border-radius: 14px;
+    background: var(--primary-soft);
+    border: 1px solid #bfdbfe;
+    color: var(--primary);
+    font-size: 14px;
+  }
+
+  @media (max-width: 640px) {
     .wrap {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 20px 12px 40px;
+      padding: 14px 8px 28px;
     }
 
     .card {
-      background: #fff;
-      border-radius: 18px;
-      padding: 18px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-      margin-bottom: 18px;
-    }
-
-    h1, h2 {
-      margin: 0 0 8px;
-      letter-spacing: -0.2px;
-    }
-
-    h1 { font-size: 28px; }
-    h2 { font-size: 22px; }
-
-    .sub {
-      margin: 0 0 16px;
-      color: #6b7280;
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
-    .title-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-    }
-
-    .search-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-
-    input[type="text"] {
-      flex: 1;
-      min-width: 220px;
-      height: 46px;
-      border: 1px solid #d1d5db;
-      border-radius: 14px;
-      padding: 0 14px;
-      font-size: 16px;
-      text-transform: uppercase;
-      outline: none;
-    }
-
-    input[type="text"]:focus {
-      border-color: #94a3b8;
-      box-shadow: 0 0 0 3px rgba(148,163,184,0.12);
-    }
-
-    button {
-      border: none;
-      border-radius: 12px;
-      padding: 0 16px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: 0.15s ease;
-    }
-
-    .primary-btn {
-      height: 46px;
-      background: #3b82f6;
-      color: white;
-    }
-
-    .primary-btn:hover {
-      background: #2563eb;
-    }
-
-    .soft-danger-btn {
-      height: 40px;
-      background: #fca5a5;
-      color: #7f1d1d;
-    }
-
-    .soft-danger-btn:hover {
-      background: #f87171;
-      color: white;
-    }
-
-    .refresh-btn {
-      height: 40px;
-      padding: 0 14px;
-      background: #eef2ff;
-      color: #4338ca;
-      border: 1px solid #c7d2fe;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .refresh-btn:hover {
-      background: #e0e7ff;
-    }
-
-    .mini-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 34px;
-      border: none;
-      border-radius: 10px;
-      padding: 7px 12px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      text-decoration: none;
-      transition: 0.15s ease;
-      white-space: nowrap;
-    }
-
-    .fav-btn {
-      background: #fcd34d;
-      color: #78350f;
-    }
-
-    .fav-btn:hover {
-      background: #fbbf24;
-    }
-
-    .remove-btn {
-      background: #fecaca;
-      color: #991b1b;
-    }
-
-    .remove-btn:hover {
-      background: #fca5a5;
-    }
-
-    .call-btn {
-      background: #a7f3d0;
-      color: #065f46;
-    }
-
-    .call-btn:hover {
-      background: #6ee7b7;
-    }
-
-    .status {
-      margin: 8px 0 0;
-      font-size: 14px;
-      color: #6b7280;
-    }
-
-    .result-head {
-      margin-top: 22px;
+      padding: 14px;
+      border-radius: 16px;
       margin-bottom: 14px;
     }
 
-    .icao {
-      display: inline-block;
-      padding: 5px 10px;
-      border-radius: 999px;
-      background: #dbeafe;
-      color: #2563eb;
-      font-size: 13px;
-      font-weight: 700;
-      margin-bottom: 10px;
+    h1 { font-size: 24px; }
+    h2 { font-size: 19px; }
+
+    .search-row {
+      grid-template-columns: 1fr;
+    }
+
+    .primary-btn {
+      width: 100%;
     }
 
     .airport-name {
-      font-size: 24px;
-      font-weight: 800;
-      margin: 0 0 8px;
-      line-height: 1.28;
-    }
-
-    .count {
-      color: #6b7280;
-      font-size: 14px;
-    }
-
-    .fbo-list {
-      display: grid;
-      gap: 12px;
-      margin-top: 18px;
-    }
-
-    .fbo-item {
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      padding: 16px;
-      background: #fafafa;
+      font-size: 19px;
     }
 
     .fbo-name {
-      font-size: 17px;
-      font-weight: 800;
-      margin-bottom: 8px;
-      line-height: 1.35;
-    }
-
-    .phone-text {
-      font-size: 15px;
-      color: #111827;
-      word-break: break-all;
-      margin-bottom: 12px;
-    }
-
-    .action-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .empty {
-      margin-top: 8px;
-      padding: 16px;
-      border-radius: 14px;
-      background: #fff7ed;
-      color: #9a3412;
-      border: 1px solid #fdba74;
-    }
-
-    .fav-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-
-    .fav-list {
-      display: grid;
-      gap: 10px;
+      font-size: 16px;
     }
 
     .fav-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      padding: 14px;
-      background: #f9fafb;
+      grid-template-columns: 1fr;
+      align-items: stretch;
     }
 
-    .fav-main {
+    .fav-actions,
+    .action-row {
+      width: 100%;
+    }
+
+    .fav-actions .mini-btn,
+    .action-row .mini-btn {
       flex: 1;
-      min-width: 220px;
+      text-align: center;
     }
 
-    .fav-route-line {
-      font-size: 16px;
-      font-weight: 800;
-      margin-bottom: 4px;
-      line-height: 1.35;
-    }
-
-    .fav-phone-line {
-      font-size: 15px;
-      font-weight: 700;
-      color: #374151;
-      margin-bottom: 6px;
-      line-height: 1.35;
-    }
-
-    .fav-airport-name {
-      color: #6b7280;
+    .soft-danger-btn {
+      height: 38px;
+      padding: 0 12px;
       font-size: 13px;
-      line-height: 1.4;
     }
 
-    .fav-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .footer-note {
-      margin-top: 18px;
+    .refresh-btn {
+      height: 36px;
+      padding: 0 12px;
       font-size: 12px;
-      color: #6b7280;
-      line-height: 1.6;
     }
+  }
+</style>
 
-    .loading-box {
-      margin-top: 10px;
-      padding: 14px;
-      border-radius: 14px;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      color: #1d4ed8;
-      font-size: 14px;
-    }
-
-    @media (max-width: 640px) {
-      .wrap {
-        padding: 14px 8px 28px;
-      }
-
-      .card {
-        padding: 14px;
-        border-radius: 16px;
-      }
-
-      h1 { font-size: 24px; }
-      h2 { font-size: 19px; }
-
-      .airport-name {
-        font-size: 19px;
-      }
-
-      .fbo-name {
-        font-size: 16px;
-      }
-
-      .fav-item,
-      .action-row {
-        align-items: stretch;
-      }
-
-      .fav-main {
-        min-width: 100%;
-      }
-
-      .fav-route-line {
-        font-size: 15px;
-        margin-bottom: 3px;
-      }
-
-      .fav-phone-line {
-        font-size: 14px;
-        margin-bottom: 6px;
-      }
-
-      .fav-actions,
-      .action-row {
-        width: 100%;
-      }
-
-      .fav-actions .mini-btn,
-      .action-row .mini-btn {
-        flex: 1;
-        text-align: center;
-      }
-
-      .soft-danger-btn {
-        height: 38px;
-        padding: 0 12px;
-        font-size: 13px;
-      }
-
-      .refresh-btn {
-        height: 36px;
-        padding: 0 12px;
-        font-size: 12px;
-      }
-    }
-  </style>
+  
 </head>
 <body>
   <div id="authScreen" style="
@@ -391,7 +440,7 @@
     align-items:center;
     justify-content:center;
     padding:24px;
-    background:#f4f7fb;
+   background:#f3f6fb;
     font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans KR',Arial,sans-serif;
   ">
     승인 확인 중...
